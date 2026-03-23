@@ -131,4 +131,5 @@ class DevStaticFiles(StaticFiles):
         return response
 
 # Serve static files for the frontend
-app.mount("/", DevStaticFiles(directory="../frontend", html=True), name="static")
+_frontend_dir = os.path.join(os.path.dirname(__file__), "..", "frontend")
+app.mount("/", DevStaticFiles(directory=_frontend_dir, html=True), name="static")
