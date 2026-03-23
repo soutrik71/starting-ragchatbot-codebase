@@ -4,10 +4,12 @@ warnings.filterwarnings("ignore", message="resource_tracker: There appear to be.
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 import os
+import uuid
 
 from config import config
 from rag_system import RAGSystem
@@ -51,6 +53,15 @@ class CourseStats(BaseModel):
     total_courses: int
     course_titles: List[str]
 
+class NewSessionRequest(BaseModel):
+    """Request model for new session creation"""
+    session_id: Optional[str] = None
+
+class NewSessionResponse(BaseModel):
+    """Response model for new session creation"""
+    session_id: str
+    conversation_id: str
+
 # API Endpoints
 
 @app.post("/api/query", response_model=QueryResponse)
@@ -85,6 +96,18 @@ async def get_course_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/new-session", response_model=NewSessionResponse)
+async def new_session(request: NewSessionRequest):
+    """Clear old session and create a fresh one with a new conversation ID"""
+    try:
+        if request.session_id:
+            rag_system.session_manager.clear_session(request.session_id)
+        new_session_id = rag_system.session_manager.create_session()
+        conversation_id = str(uuid.uuid4())
+        return NewSessionResponse(session_id=new_session_id, conversation_id=conversation_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.on_event("startup")
 async def startup_event():
     """Load initial documents on startup"""
@@ -97,23 +120,15 @@ async def startup_event():
         except Exception as e:
             print(f"Error loading documents: {e}")
 
-# Custom static file handler with no-cache headers for development
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
-import os
-from pathlib import Path
-
-
 class DevStaticFiles(StaticFiles):
+    """Static file handler with no-cache headers for development"""
     async def get_response(self, path: str, scope):
         response = await super().get_response(path, scope)
         if isinstance(response, FileResponse):
-            # Add no-cache headers for development
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
         return response
-    
-    
+
 # Serve static files for the frontend
-app.mount("/", StaticFiles(directory="../frontend", html=True), name="static")
+app.mount("/", DevStaticFiles(directory="../frontend", html=True), name="static")

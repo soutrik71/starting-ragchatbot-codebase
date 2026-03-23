@@ -85,6 +85,33 @@ header h1 {
     flex-shrink: 0;
 }
 
+/* New Chat Button */
+.new-chat-container {
+    padding: 0 0 1rem 0;
+}
+
+.new-chat-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.55rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.new-chat-btn:hover {
+    background: var(--surface-hover);
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
 /* Custom Scrollbar for Sidebar */
 .sidebar::-webkit-scrollbar {
     width: 8px;
@@ -241,7 +268,34 @@ header h1 {
 }
 
 .sources-content {
-    padding: 0 0.5rem 0.25rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.25rem 0.5rem 0.25rem 1rem;
+}
+
+.source-pill {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    max-width: fit-content;
+}
+
+.source-pill a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.source-pill a:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+}
+
+.source-pill:not(:has(a)) {
     color: var(--text-secondary);
 }
 
